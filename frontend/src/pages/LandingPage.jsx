@@ -102,7 +102,7 @@ export default function LandingPage() {
         >
           <div className="rounded-2xl bg-slate-900/70 border border-slate-700 shadow-2xl p-6">
             <div className="aspect-video rounded-xl bg-linear-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-400">
-              Video Preview
+              <img src="/image.png" alt="video preview" className="h-76 w-135"/>
             </div>
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm text-slate-400">Live Call</span>

@@ -25,9 +25,8 @@ export default function History() {
         fetchHistory();
     }, [getHistoryOfUser]);
 
-    // Filtered meetings based on search input
     const filteredMeetings = useMemo(() => {
-        return meetings.filter(m => 
+        return meetings.filter(m =>
             m.meetingCode.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [meetings, searchQuery]);
@@ -42,96 +41,105 @@ export default function History() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-12 text-slate-900">
-            <div className="max-w-6xl mx-auto">
-                
-                {/* Header & Search */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-white px-6 md:px-12 py-10">
+            <div className="max-w-7xl mx-auto">
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+
                     <div className="flex items-center gap-4">
-                        <motion.button 
+                        <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate("/home")}
-                            className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-200 text-slate-600 hover:text-indigo-600 transition-colors"
+                            className="p-3 bg-slate-900 border border-slate-700 rounded-xl hover:bg-indigo-600 transition"
                         >
                             <ChevronLeft size={22} />
                         </motion.button>
+
                         <div>
-                            <h1 className="text-3xl font-extrabold tracking-tight">Meeting History</h1>
-                            <p className="text-slate-500 text-sm font-medium">Review and rejoin your past sessions</p>
+                            <h1 className="text-3xl font-extrabold">Meeting History</h1>
+                            <p className="text-slate-400 text-sm">
+                                Review and rejoin your past sessions
+                            </p>
                         </div>
                     </div>
+                    
 
+                    {/* Search */}
                     <div className="relative group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
-                        <input 
-                            type="text" 
-                            placeholder="Search by code..."
+                        <Search
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition"
+                            size={18}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search meeting code..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+                            className="pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl w-full md:w-72 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
                 </div>
 
-                {/* Content Logic */}
+                {/* Loading */}
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
-                        <p className="text-slate-500 font-medium">Fetching your history...</p>
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <Loader2 className="animate-spin text-indigo-400 mb-4" size={40} />
+                        <p className="text-slate-400 font-medium">Fetching your history...</p>
                     </div>
                 ) : filteredMeetings.length === 0 ? (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }} 
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"
+                        className="flex flex-col items-center justify-center py-28 bg-slate-900/70 border border-slate-700 rounded-3xl"
                     >
-                        <div className="p-4 bg-slate-50 rounded-full mb-4">
-                            <VideoOff size={48} className="text-slate-300" />
+                        <div className="p-4 bg-slate-800 rounded-full mb-4">
+                            <VideoOff size={48} className="text-slate-500" />
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-800">No meetings found</h3>
-                        <p className="text-slate-500">Try a different search or start a new call.</p>
+                        <h3 className="text-lg font-semibold">No meetings found</h3>
+                        <p className="text-slate-400">
+                            Try a different search or start a new call.
+                        </p>
                     </motion.div>
                 ) : (
-                    <motion.div 
+                    <motion.div
                         layout
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                        <AnimatePresence mode='popLayout'>
+                        <AnimatePresence mode="popLayout">
                             {filteredMeetings.map((meeting, index) => (
                                 <motion.div
                                     layout
                                     key={meeting._id || index}
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.3, delay: index * 0.03 }}
-                                    whileHover={{ y: -6, transition: { delay: 0 } }}
-                                    className="group bg-white p-6 rounded-3xl border border-slate-200 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] transition-all"
+                                    transition={{ duration: 0.3, delay: index * 0.04 }}
+                                    whileHover={{ y: -6 }}
+                                    className="group bg-slate-900/70 border border-slate-700 p-6 rounded-2xl shadow-xl hover:border-indigo-500 transition-all"
                                 >
                                     <div className="flex items-center justify-between mb-6">
-                                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                                        <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl">
                                             <Hash size={20} />
                                         </div>
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                                                Session
-                                            </span>
-                                        </div>
+                                        <span className="text-xs font-bold uppercase text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
+                                            Session
+                                        </span>
                                     </div>
-                                    
-                                    <h3 className="text-xl font-bold text-slate-800 mb-2 truncate">
+
+                                    <h3 className="text-xl font-bold mb-2">
                                         {meeting.meetingCode}
                                     </h3>
-                                    
-                                    <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+
+                                    <div className="flex items-center gap-2 text-slate-400 text-sm">
                                         <Calendar size={15} />
                                         <span>{formatDate(meeting.date)}</span>
                                     </div>
 
-                                    <button 
+                                    <button
                                         onClick={() => navigate(`/${meeting.meetingCode}`)}
-                                        className="mt-6 w-full py-3 text-sm font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all active:scale-[0.98]"
+                                        className="mt-6 w-full py-3 text-sm font-semibold bg-slate-800 border border-slate-700 rounded-xl hover:bg-indigo-500 hover:border-indigo-500 transition"
                                     >
                                         Rejoin Room
                                     </button>

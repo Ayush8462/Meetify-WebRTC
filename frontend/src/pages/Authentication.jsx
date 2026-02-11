@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useContext, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthPage() {
   const [isSignup, setIsSignup] = useState(false);
@@ -14,6 +15,7 @@ export default function AuthPage() {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   const { handleLogin, handleRegister } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLoginSubmit = async (e) => {
   e.preventDefault();
@@ -61,6 +63,14 @@ const handleSignupSubmit = async (e) => {
         transition={{ duration: 0.6 }}
         className="w-full max-w-md rounded-3xl bg-slate-900/70 border border-slate-700 shadow-2xl p-10"
       >
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/")}
+          className="p-2.5 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 rounded-xl shadow-sm border border-slate-700 text-slate-600 hover:text-indigo-600 transition-colors"
+        >
+          <ChevronLeft size={22} />
+        </motion.button>
         {/* Header */}
         <div className="text-center mb-8">
           <motion.h1 layout className="text-3xl font-bold">
@@ -241,7 +251,7 @@ const handleSignupSubmit = async (e) => {
             onClick={() => {
               setIsSignup(!isSignup);
               setError("");
-              setMessages("");
+              setMessage("");
             }}
             className="text-indigo-400 hover:underline"
           >
