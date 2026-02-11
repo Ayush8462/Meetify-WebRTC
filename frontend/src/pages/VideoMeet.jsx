@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 // --- Configuration ---
-const SERVER_URL = "http://localhost:8080";
+const SERVER_URL = server;
 
 const PEER_CONFIG = {
   iceServers: [
