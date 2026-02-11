@@ -5,6 +5,7 @@ import {
   Mic, MicOff, Video, VideoOff, PhoneOff, 
   MessageSquare, Send, MonitorUp, Users, X 
 } from "lucide-react";
+import server from '../environment';
 
 // --- Configuration ---
 const SERVER_URL = server;
