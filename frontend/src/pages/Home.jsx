@@ -125,8 +125,6 @@ function Home() {
                 </motion.div>
 
             </main>
-
-            
         </div>
     );
 }
