@@ -20,10 +20,10 @@ export default function LandingPage() {
         {/* Right section */}
         <div className="flex items-center gap-4">
           
-          {/* Join as Guest (ALWAYS visible) */}
+          {/* Join as Guest (ALWAYS visible)
           <Link to={"/random"} className="hover:text-indigo-400 font-medium">
             Join as Guest
-          </Link>
+          </Link> */}
 
           {/* Desktop buttons */}
           <div className="hidden md:flex items-center">
