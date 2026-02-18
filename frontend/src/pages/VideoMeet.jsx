@@ -41,6 +41,7 @@ export default function VideoMeetComponent() {
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
   const [videos, setVideos] = useState([]);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     getPermissions();
@@ -339,10 +340,21 @@ export default function VideoMeetComponent() {
     connectToSocketServer();
   }
 
+  const copyRoomLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.log("Copy failed", err);
+    }
+  };
+
+
   return (
     <div className="h-screen w-full bg-linear-to-br from-gray-950 via-gray-900 to-black text-white flex flex-col">
 
-      {askForUsername ? (
+      {askForUsername ? ( 
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-md bg-gray-900/70 backdrop-blur-xl border border-gray-800 rounded-3xl shadow-2xl p-8">
             <h1 className="text-3xl font-semibold text-center mb-6">Join Meeting</h1>
@@ -362,6 +374,20 @@ export default function VideoMeetComponent() {
               value={username}
               onChange={e => setUsername(e.target.value)}
             />
+
+            <div className="w-full bg-gray-900 border-b border-gray-800 px-4 py-4 flex items-center justify-between">
+              <div className="text-lg text-gray-300 truncate">
+                <b>Room link:</b> <br></br>{window.location.href}
+              </div>
+
+              <button
+                onClick={copyRoomLink}
+                className="ml-4 bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded-lg"
+              >
+                {copied ? "Copied!" : "Copy link"}
+              </button>
+            </div>
+
 
             <button
               onClick={connect}
