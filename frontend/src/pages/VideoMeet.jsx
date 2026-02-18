@@ -40,7 +40,7 @@ export default function VideoMeetComponent() {
   const [newMessages, setNewMessages] = useState(0);
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
-  const [videos, setVideos] = useState([])
+  const [videos, setVideos] = useState([]);
 
   useEffect(() => {
     getPermissions();
@@ -130,15 +130,24 @@ export default function VideoMeetComponent() {
           }
 
           connections[socketListId].onaddstream = (event) => {
+            const stream = event.stream;
+            const videoTrack = stream.getVideoTracks()[0];
+
             let newVideo = {
               socketId: socketListId,
-              stream: event.stream
+              stream: stream,
+              isScreen: videoTrack.label.toLowerCase().includes("screen")
             };
 
-            setVideos(videos => [
-              ...videos.filter(v => v.socketId !== socketListId),
-              newVideo
-            ]);
+            // if this stream is screen share → make it full screen
+            if (newVideo.isScreen) {
+              setActiveScreen(newVideo);
+            } else {
+              setVideos(videos => [
+                ...videos.filter(v => v.socketId !== socketListId),
+                newVideo
+              ]);
+            }
           };
 
           if (window.localStream)
@@ -172,31 +181,137 @@ export default function VideoMeetComponent() {
     }
   }
 
-  const handleVideo = () => {
+  const handleVideo = async () => {
     if (!window.localStream) return;
 
-    const videoTrack = window.localStream
+    let videoTrack = window.localStream
       .getTracks()
       .find(track => track.kind === "video");
 
-    if (!videoTrack) return;
+    // if track exists → just toggle
+    if (videoTrack) {
+      if (videoTrack.readyState === "live") {
+        videoTrack.enabled = !videoTrack.enabled;
+        setVideo(videoTrack.enabled);
+        return;
+      }
+    }
 
-    videoTrack.enabled = !videoTrack.enabled;
-    setVideo(videoTrack.enabled);
-  };
+    // if track was stopped → get new camera stream
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const newVideoTrack = newStream.getVideoTracks()[0];
 
-  const handleAudio = () => {
-    const audioTrack = window.localStream
-      ?.getTracks()
-      .find(track => track.kind === "audio");
+      window.localStream.addTrack(newVideoTrack);
+      localVideoref.current.srcObject = window.localStream;
 
-    if (audioTrack) {
-      audioTrack.enabled = !audioTrack.enabled;
-      setAudio(audioTrack.enabled);
+      setVideo(true);
+    } catch (err) {
+      console.log("Camera permission denied", err);
     }
   };
 
-  const handleScreen = () => setScreen(!screen);
+
+  const handleAudio = async () => {
+    if (!window.localStream) return;
+
+    let audioTrack = window.localStream
+      .getTracks()
+      .find(track => track.kind === "audio");
+
+    // if track exists and is live → toggle
+    if (audioTrack) {
+      if (audioTrack.readyState === "live") {
+        audioTrack.enabled = !audioTrack.enabled;
+        setAudio(audioTrack.enabled);
+        return;
+      }
+    }
+
+    // if track stopped → request mic again
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const newAudioTrack = newStream.getAudioTracks()[0];
+
+      window.localStream.addTrack(newAudioTrack);
+
+      setAudio(true);
+    } catch (err) {
+      console.log("Mic permission denied", err);
+    }
+  };
+
+
+  const handleScreen = async () => {
+    if (!window.localStream) return;
+
+    // START SCREEN SHARE
+    if (!screen) {
+      try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenTrack = screenStream.getVideoTracks()[0];
+
+        // replace video track for all peers
+        for (let id in connections) {
+          const sender = connections[id]
+            .getSenders()
+            .find(s => s.track && s.track.kind === "video");
+
+          if (sender) sender.replaceTrack(screenTrack);
+        }
+
+        // show screen locally
+        localVideoref.current.srcObject = screenStream;
+
+        setScreen(true);
+
+        // when user stops sharing from browser
+        screenTrack.onended = async () => {
+          await restoreCameraTrack();
+        };
+
+      } catch (err) {
+        console.log("Screen share error", err);
+      }
+
+      return;
+    }
+
+    // STOP SCREEN SHARE manually
+    await restoreCameraTrack();
+  };
+
+  const restoreCameraTrack = async () => {
+    try {
+      let videoTrack = window.localStream?.getVideoTracks()[0];
+
+      // if camera track missing or stopped → request new one
+      if (!videoTrack || videoTrack.readyState !== "live") {
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoTrack = newStream.getVideoTracks()[0];
+        window.localStream.addTrack(videoTrack);
+      }
+
+      // replace screen track back to camera for all peers
+      for (let id in connections) {
+        const sender = connections[id]
+          .getSenders()
+          .find(s => s.track && s.track.kind === "video");
+
+        if (sender) sender.replaceTrack(videoTrack);
+      }
+
+      // show camera locally again
+      localVideoref.current.srcObject = window.localStream;
+
+      setScreen(false);
+
+    } catch (err) {
+      console.log("Error restoring camera", err);
+    }
+  };
+
+
 
   const handleEndCall = () => {
     try {
